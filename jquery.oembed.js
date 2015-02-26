@@ -40,7 +40,7 @@
 
         return this.each(function () {
             var container = $(this),
-                resourceURL = (url && (!url.indexOf('//') || !url.indexOf('https://'))) ? url : container.attr("href"),
+                resourceURL = (url && (!url.indexOf('http://') || !url.indexOf('https://'))) ? url : container.attr("href"),
                 provider;
 
             if (embedAction) {
