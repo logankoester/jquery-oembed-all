@@ -13,7 +13,7 @@ asyncTest("Vimeo url", function() {
         handleSuccess = function() {
             var iframe = testElement.querySelector('iframe');
             ok(iframe, "Iframe is created");
-            equal(iframe.getAttribute('src').indexOf("//player.vimeo.com/video/104167125"), 0, "Iframe embed url is correct");
+            equal(iframe.getAttribute('src').indexOf("https://player.vimeo.com/video/104167125"), 0, "Iframe embed url is correct");
             start();
             end();
         }.bind(this),
