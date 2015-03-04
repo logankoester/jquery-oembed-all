@@ -54,49 +54,56 @@
 
             if (resourceURL !== null && resourceURL !== undefined) {
                 //Check if shorten URL
-                for (var j = 0, l = shortURLList.length; j < l; j++) {
-                    var regExp = new RegExp('://' + shortURLList[j] + '/', "i");
 
-                    if (resourceURL.match(regExp) !== null) {
-                        //AJAX to //api.longurl.org/v2/expand?url=//bit.ly/JATvIs&format=json&callback=hhh
-                        var ajaxopts = $.extend({
-                            url: "//api.longurl.org/v2/expand",
-                            dataType: 'jsonp',
-                            data: {
-                                url: resourceURL,
-                                format: "json"
-                                //callback: "?"
-                            },
-                            success: function (data) {
-                                //this = $.fn.oembed;
-                                resourceURL = data['long-url'];
-                                provider = $.fn.oembed.getOEmbedProvider(data['long-url']);
-
-                                //remove fallback
-                                if (!!settings.fallback === false) {
-                                    provider = provider.name.toLowerCase() === 'opengraph' ? null : provider;
-                                }
-
-                                if (provider !== null) {
-                                    provider.params = getNormalizedParams(settings[provider.name]) || {};
-                                    provider.maxWidth = settings.maxWidth;
-                                    provider.maxHeight = settings.maxHeight;
-                                    embedCode(container, resourceURL, provider);
-                                } else {
-                                    settings.onProviderNotFound.call(container, resourceURL);
-                                }
-                            },
-                            error: function () {
-                                settings.onError.call(container, resourceURL)
-                            }
-                        }, settings.ajaxOptions || {});
-
-                        $.ajax(ajaxopts);
-
-                        return container;
-                    }
-                }
                 provider = $.fn.oembed.getOEmbedProvider(resourceURL);
+
+                // If not in providers list (or fallback) try if is shortened url
+                // The service does not support https, so if short url is not in providers it will not work
+                if (!provider || provider.name === "opengraph" && window.location.protocol !== "https:") {
+                    for (var j = 0, l = shortURLList.length; j < l; j++) {
+                        var regExp = new RegExp('://' + shortURLList[j] + '/', "i");
+
+                        if (resourceURL.match(regExp) !== null) {
+                            //AJAX to //api.longurl.org/v2/expand?url=//bit.ly/JATvIs&format=json&callback=hhh
+                            var ajaxopts = $.extend({
+                                url: "http://api.longurl.org/v2/expand",
+                                dataType: 'jsonp',
+                                data: {
+                                    url: resourceURL,
+                                    format: "json"
+                                    //callback: "?"
+                                },
+                                success: function (data) {
+                                    //this = $.fn.oembed;
+                                    resourceURL = data['long-url'];
+                                    provider = $.fn.oembed.getOEmbedProvider(data['long-url']);
+
+                                    //remove fallback
+                                    if (!!settings.fallback === false) {
+                                        provider = provider.name.toLowerCase() === 'opengraph' ? null : provider;
+                                    }
+
+                                    if (provider !== null) {
+                                        provider.params = getNormalizedParams(settings[provider.name]) || {};
+                                        provider.maxWidth = settings.maxWidth;
+                                        provider.maxHeight = settings.maxHeight;
+                                        embedCode(container, resourceURL, provider);
+                                    } else {
+                                        settings.onProviderNotFound.call(container, resourceURL);
+                                    }
+                                },
+                                error: function () {
+                                    settings.onError.call(container, resourceURL)
+                                }
+                            }, settings.ajaxOptions || {});
+
+                            $.ajax(ajaxopts);
+
+                            return container;
+                        }
+                    }
+                    provider = $.fn.oembed.getOEmbedProvider(resourceURL);
+                }
 
                 //remove fallback
                 if (!!settings.fallback === false) {
